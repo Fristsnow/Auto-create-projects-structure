@@ -1,0 +1,18 @@
+// 全局浅色样式占位，可按需扩展
+$primary-color: #2f54eb;
+$text-color: #1f1f1f;
+$bg-gradient: linear-gradient(180deg, #f8fbff 0%, #fafafa 100%);
+
+body {
+  background: $bg-gradient;
+  color: $text-color;
+  font-family: 'Lato', 'Segoe UI', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.app-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 12px;
+}
