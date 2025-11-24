@@ -23,3 +23,16 @@ export interface ComponentRegistryItem {
 export interface ComponentRegistryPayload {
   components: ComponentRegistryItem[]
 }
+
+export interface ToolMenuItem {
+  key: string
+  label: string
+  route?: string
+  icon?: string
+  enabled?: boolean
+}
+
+export interface ToolMenuPayload {
+  tools: ToolMenuItem[]
+  visible: boolean
+}

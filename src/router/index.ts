@@ -9,13 +9,12 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import CreateProject from '@/views/CreateProject.vue'
+const DevelopingView = () => import('@/views/DevelopingView.vue')
 
 const routes: RouteRecordRaw[] = [
-  {
-    path: '/',
-    name: 'CreateProject',
-    component: CreateProject,
-  },
+  { path: '/', name: 'CreateProject', component: CreateProject },
+  { path: '/tool/vue', name: 'ToolVue', component: CreateProject },
+  { path: '/tool/:key', name: 'ToolOther', component: DevelopingView },
 ]
 
 export const router = createRouter({

@@ -5,6 +5,8 @@ import { invoke } from '@tauri-apps/api/core'
 import type { ComponentRegistryItem, ComponentRegistryPayload } from '@/types'
 const message = useMessage()
 
+const props = defineProps<{ inline?: boolean }>()
+
 const list = ref<ComponentRegistryItem[]>([])
 // 仅在抽屉中展示一个示例，不展示用户新增的条目
 const demoRows = ref<ComponentRegistryItem[]>([
@@ -87,7 +89,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="registry-toolbar">
+  <div :class="['registry-toolbar', { inline: props.inline }]">
     <NButton size="small" secondary @click="show = true">组件库扩充</NButton>
   </div>
   <NDrawer v-model:show="show" placement="top" height="720" :trap-focus="false" :mask-closable="true" :z-index="3000">
@@ -162,6 +164,12 @@ onMounted(async () => {
   z-index: 2000;
   display: flex;
   justify-content: flex-end;
+}
+.registry-toolbar.inline {
+  position: static;
+  top: auto;
+  right: auto;
+  z-index: auto;
 }
 code { color: #2f54eb }
 .drawer-content-body { max-height: 700px; overflow: auto; }

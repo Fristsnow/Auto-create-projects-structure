@@ -25,7 +25,9 @@ pub fn run() {
       commands::config::read_default_directory,
       commands::registry::read_component_registry,
       commands::registry::save_component_registry,
-      commands::registry::fetch_npm_versions
+      commands::registry::fetch_npm_versions,
+      commands::menu::read_tool_menu,
+      commands::menu::save_tool_menu,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

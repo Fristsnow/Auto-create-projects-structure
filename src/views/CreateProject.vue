@@ -7,6 +7,7 @@ import { PlayCircleOutline } from '@vicons/ionicons5'
 import EnvStatus from '@/components/EnvStatus.vue'
 import ProjectForm from '@/components/ProjectForm.vue'
 import ProjectFeatures from '@/components/ProjectFeatures.vue'
+import FeatureSelectModal from '@/components/FeatureSelectModal.vue'
 import StepsGuide from '@/components/StepsGuide.vue'
 import PathSelectorModal from '@/components/PathSelectorModal.vue'
 import ExecTerminal from '@/components/ExecTerminal.vue'
@@ -21,6 +22,13 @@ const setDefaultDir = ref(true)
 const creating = ref(false)
 const message = useMessage()
 const features = ref<FeatureKey[]>(['sass', 'vfonts'])
+const showFeatureModal = ref(false)
+const registry = ref<ComponentRegistryItem[]>([])
+const selectedNames = computed(() => {
+  const map = new Map<string, string>()
+  registry.value.forEach(i => map.set(i.key, i.label || i.key))
+  return features.value.map(k => map.get(k) || k)
+})
 
 // 执行框状态
 const showExec = ref(false)
@@ -121,6 +129,10 @@ onMounted(async () => {
     // 非 Tauri 环境忽略
   }
   await initDefaultDir()
+  try {
+    const v = await invoke<ComponentRegistryPayload>('read_component_registry')
+    registry.value = v.components || []
+  } catch (_) {}
 })
 
 const showPathSelector = ref(false)
@@ -135,9 +147,9 @@ function onPathConfirm(payload: { type: 'default' | 'custom'; path: string; reme
 
 <template>
   <div class="page app-container">
-    <NPageHeader>
+    <NPageHeader class="page-hero">
       <template #title>
-        <NGradientText gradient="linear-gradient(90deg, #2f54eb 0%, #13c2c2 100%)">
+        <NGradientText gradient="linear-gradient(90deg, #6C8FA9 0%, #C8ADC4 100%)" style="font-size:32px;">
           可视化创建 Vue 项目
         </NGradientText>
       </template>
@@ -147,8 +159,12 @@ function onPathConfirm(payload: { type: 'default' | 'custom'; path: string; reme
       
     </NPageHeader>
 
-    <NSpace vertical size="large">
+    <div class="fixed-steps">
       <StepsGuide :missing-env="missingEnv" :target-dir="targetDir" />
+    </div>
+
+    <NSpace vertical size="large">
+      
 
       <NCard size="large" :segmented="{ content: true, footer: 'soft' }" title="运行环境">
         <EnvStatus :env="env" :missing-env="missingEnv" />
@@ -171,7 +187,17 @@ function onPathConfirm(payload: { type: 'default' | 'custom'; path: string; reme
 
         <NDivider />
 
-        <ProjectFeatures :vue-version="vueVersion" :project-lang="projectLang" v-model:modelValue="features" />
+        <NSpace vertical>
+          <NSpace align="center" justify="space-between">
+            <NButton tertiary size="large" @click="showFeatureModal = true">选择组件</NButton>
+            <div class="selected-count">已选：{{ features.length }} 项</div>
+          </NSpace>
+          <div class="selected-list">
+            <div class="selected-grid">
+              <NTag v-for="name in selectedNames" :key="name" size="small" type="success">{{ name }}</NTag>
+            </div>
+          </div>
+        </NSpace>
 
         <NDivider />
 
@@ -181,6 +207,7 @@ function onPathConfirm(payload: { type: 'default' | 'custom'; path: string; reme
       </NCard>
 
       <PathSelectorModal v-model:show="showPathSelector" @confirm="onPathConfirm" />
+      <FeatureSelectModal v-model:visible="showFeatureModal" :vue-version="vueVersion" :project-lang="projectLang" v-model:value="features" />
       <ExecTerminal v-model:visible="showExec" :logs="execLogs" title="创建项目执行过程" />
     </NSpace>
   </div>
@@ -190,5 +217,39 @@ function onPathConfirm(payload: { type: 'default' | 'custom'; path: string; reme
 <style lang="scss" scoped>
 .page {
   padding: 24px 16px 32px;
+}
+.page-hero { text-align: center; }
+.page-hero :deep(.n-page-header__content) { justify-content: center; }
+.page-hero :deep(.n-page-header__title) { display: flex; justify-content: center; }
+.page-hero :deep(.n-page-header__subtitle) { text-align: center; color: #6C8FA9; }
+.fixed-steps {
+  position: fixed;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 280px;
+  z-index: 1100;
+}
+.selected-count { color: #6C8FA9; }
+.selected-list { padding-top: 8px; }
+.selected-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  max-height: 120px;
+  overflow: auto;
+  padding: 4px 0;
+}
+.feature-card {
+  will-change: transform;
+  transition: transform .12s ease-out, box-shadow .18s ease-out, border-color .18s ease-out;
+}
+.feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(50, 89, 105, 0.08);
+}
+.feature-card.selected {
+  border-color: #325969;
+  box-shadow: 0 0 0 2px rgba(50, 89, 105, .15);
 }
 </style>
